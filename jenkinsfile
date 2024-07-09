@@ -1,1 +1,36 @@
-hello
+pipeline {
+    agent any
+ 
+    environment {
+        HELM_CHART_DIR = './charts'  
+        KUBE_NAMESPACE = 'default'  
+    }
+ 
+    stages {
+        stage('Checkout') {
+            steps {
+                git 
+            }
+        }
+ 
+        stage('Deploy Helm Chart') {
+            steps {
+                script {
+                    sh 'helm version --short'
+                 
+                    // Deploy Helm chart
+                    sh "helm upgrade --install hello-world ${HELM_CHART_DIR} --namespace ${KUBE_NAMESPACE}"
+                }
+            }
+        }
+ 
+        stage('Verify Deployment') {
+            steps {
+                script {
+                    sh 'kubectl get pods --namespace ${KUBE_NAMESPACE}'
+                    sh 'kubectl get services --namespace ${KUBE_NAMESPACE}'
+                    // Add further verification steps as needed
+                }
+            }
+        }
+    }
